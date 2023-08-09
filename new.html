@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    h1 {
+        text-align: center;
+        padding: 20px;
+        background-color: #4118d6;
+        color: white;
+    }
+
+    #container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 16px;
+    }
+
+    button {
+        background-color: #20835b;
+        color: rgb(0, 16, 4);
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    li {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    button.delete-button {
+        background-color: #d9534f;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    button.delete-button:hover {
+        background-color: #c9302c;
+    }
+    
+    button.edit-button {
+        background-color: #5bc0de;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    button.edit-button:hover {
+        background-color: #46b8da;
+    }
+</style>
+</head>
+<body>
+<h1>Booking App</h1>
+
+<div id="container">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" required>
+    <button onclick="addBooking()">Add Booking</button>
+    <button onclick="displayBookings()">Display Bookings</button>
+</div>
+
+<h2>Bookings:</h2>
+<ul id="bookingList"></ul>
+
+<script>
+    let bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+    let editingIndex = -1; // Index of the booking being edited
+
+    function addBooking() {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+
+        if (name && email && phone) {
+            if (editingIndex !== -1) {
+                bookings[editingIndex] = { name, email, phone };
+                editingIndex = -1; // Reset editing index
+            } else {
+                const booking = { name, email, phone };
+                bookings.push(booking);
+            }
+            clearInputFields();
+            updateBookingList();
+            saveToLocalStorage();
+            console.log("Booking added successfully!");
+        } else {
+            alert("Please fill in all fields.");
+        }
+    }
+
+    function editBooking(index) {
+        const booking = bookings[index];
+        document.getElementById("name").value = booking.name;
+        document.getElementById("email").value = booking.email;
+        document.getElementById("phone").value = booking.phone;
+        editingIndex = index; // Set editing index
+    }
+
+    function displayBookings() {
+        const bookingList = document.getElementById("bookingList");
+        bookingList.innerHTML = "";
+
+        if (bookings.length === 0) {
+            const listItem = document.createElement("li");
+            listItem.textContent = "No bookings available.";
+            bookingList.appendChild(listItem);
+        } else {
+            bookings.forEach((booking, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `Name: ${booking.name}, Email: ${booking.email}, Phone: ${booking.phone}`;
+                const editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.className = "edit-button";
+                editButton.onclick = function() {
+                    editBooking(index);
+                };
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-button";
+                deleteButton.onclick = function() {
+                    deleteBooking(index);
+                };
+                listItem.appendChild(editButton);
+                listItem.appendChild(deleteButton);
+                bookingList.appendChild(listItem);
+            });
+        }
+    }
+
+    function deleteBooking(index) {
+        bookings.splice(index, 1);
+        updateBookingList();
+        saveToLocalStorage();
+    }
+
+    function clearInputFields() {
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("phone").value = "";
+    }
+
+    function updateBookingList() {
+        const bookingList = document.getElementById("bookingList");
+        bookingList.innerHTML = "";
+        displayBookings();
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+    }
+</script>
+</body>
+</html>
